@@ -49,15 +49,16 @@ public class BallAimCommand extends Command {
     protected void execute() {
     	Double Center = (640.0/2.0);
     	Double Deadband = (Center/10);
-    	double maxPower = 0.07;
+    	
     	Double[] ballCenters = visionTable.getNumberArray("x", Default_Value);
     	Double[] ballSizes = visionTable.getNumberArray("size", Default_Value);
+    	double ballSize = 0.0;
     	Double motorPower = 0.0;
     	Double ballCenter = 0.0;
-    	double ballSize = 0.0;
+    	double maxPower = 0.1;
     	
     	if (ballCenters.length == 0) {
-    		ballCenter = Center;
+    		motorPower = maxPower;
     	}
     	else {
     		ballCenter = ballCenters[0];
@@ -70,17 +71,32 @@ public class BallAimCommand extends Command {
     		ballSize = ballSizes[0];
     	}
     	
-    	if (ballSize < 90) {
+    	if (ballSize < 45) {
     		ballCenter = Center;
     	}
     	
     	System.out.println(ballCenter);
-    	
+//WIP
+		double speedScalar = ((ballCenter-(Center-Deadband))/(Center-Deadband));
+		double inverseScalar = (-1*speedScalar);
+		
     	if (ballCenter > (Center+Deadband)) {
-    		motorPower = maxPower;
+    		
+    		if (speedScalar < 0.2) {
+    			motorPower = 0.2;
+    		}
+    		else {
+    			motorPower = speedScalar;
+    		}
     	}
     	else if (ballCenter < (Center-Deadband)) {
-    		motorPower = -maxPower;
+    		
+    		if (inverseScalar < 0.2) {
+    			motorPower = 0.2;
+    		}
+    		else {
+    			motorPower = inverseScalar;
+    		}
     	} 
     	RobotMap.circlewithgearSpeedController1.set(motorPower);
     	
